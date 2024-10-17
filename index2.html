@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Open Interest Dashboard</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+    <style>
+        body {
+            background-color: #f8f9fa;
+            font-family: Arial, sans-serif;
+            margin: 20px;
+        }
+        #loading {
+            display: none;
+            text-align: center;
+            font-size: 24px;
+            margin-top: 20px;
+        }
+        .data-table {
+            margin-top: 20px;
+        }
+        .btn-refresh {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1 class="text-center">Open Interest Dashboard</h1>
+        <button class="btn btn-primary btn-refresh" onclick="fetchData()">Refresh Data</button>
+        <div id="loading">Loading...</div>
+        <div id="data-table" class="data-table"></div>
+    </div>
+
+    <script>
+        function fetchData() {
+            document.getElementById('loading').style.display = 'block'; // Show loading
+            const apiKey = 'AIzaSyCM6IFHqHV-I9VIe-5tmNe5TfjLsi1KvjE';  // Replace with your actual API key
+            const sheetId = '1PvWr4k7ntx451-qs6gxxyJXE3AuhlZ9TfW4WM8Bnjxg'; // Replace with your actual Google Sheet ID
+            const range = 'Sheet1!A1:D10';   // Adjust the range as necessary
+            const url = `https://sheets.googleapis.com/v4/spreadsheets/${sheetId}/values/${range}?key=${apiKey}`;
+
+            fetch(url)
+                .then(response => {
+                    if (!response.ok) throw new Error('Network response was not ok');
+                    return response.json();
+                })
+                .then(data => {
+                    document.getElementById('loading').style.display = 'none'; // Hide loading
+                    displayData(data.values);
+                })
+                .catch(error => {
+                    console.error('Error loading data:', error);
+                    document.getElementById('loading').innerText = 'Failed to load data. Please try again later.';
+                });
+        }
+
+        function displayData(values) {
+            const table = document.createElement('table');
+            table.classList.add('table', 'table-striped');
+            let headerRow = document.createElement('tr');
+
+            // Create table headers
+            values[0].forEach(header => {
+                let th = document.createElement('th');
+                th.innerText = header;
+                headerRow.appendChild(th);
+            });
+            table.appendChild(headerRow);
+
+            // Create table rows
+            for (let i = 1; i < values.length; i++) {
+                let row = document.createElement('tr');
+                values[i].forEach(cell => {
+                    let td = document.createElement('td');
+                    td.innerText = cell;
+                    row.appendChild(td);
+                });
+                table.appendChild(row);
+            }
+
+            // Clear previous data and append new table
+            const dataTable = document.getElementById('data-table');
+            dataTable.innerHTML = ''; // Clear previous data
+            dataTable.appendChild(table);
+        }
+    </script>
+</body>
+</html>
